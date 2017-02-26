@@ -125,7 +125,15 @@
     var continuedText = '';
     var fadeOnReset = config.fadeOnReset !== undefined ? config.fadeOnReset : true;
     // Prompt history stack
-    var history = [];
+    var maxHistorySize = config.maxHistorySize !== undefined ? config.maxHistorySize : 100;
+    var history;
+    try {
+      var historyString = localStorage.getItem("history");
+      history = (historyString !== null) ? JSON.parse(historyString) : [];
+    }
+    catch (e) {
+      history = [];
+    }
     var ringn = 0;
     // For reasons unknown to The Sword of Michael himself, Opera
     // triggers and sends a key character when you hit various
@@ -393,7 +401,14 @@
 
     // Add something to the history ring
     function addToHistory(line){
+      if (line.trim() === "" || line === history[history.length - 1]) {
+        return;
+      }
       history.push(line);
+      while (history.length > maxHistorySize) {
+        history.shift();
+      }
+      localStorage.setItem("history", JSON.stringify(history));
       restoreText = '';
     };
 
